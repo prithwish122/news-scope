@@ -1,18 +1,17 @@
-import { NewsList } from '@/components/NewsList'
-import React from 'react'
+import { NewsList } from "@/components/NewsList";
 
-export default async function SearchResults({
-  params,
-}: {
-  params: { slug: string };
-}) {
-  const Params = await params;
-  const query = Params.slug;
+type PageProps = {
+  params: {
+    slug: string;
+  };
+};
+
+export default function SearchResults({ params }: PageProps) {
+  const query = params.slug;
 
   return (
     <div className="container mx-auto px-4 py-8">
-    
       <NewsList search={query} />
     </div>
-  )
+  );
 }
