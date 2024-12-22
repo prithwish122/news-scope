@@ -4,7 +4,8 @@
 
 export async function fetchNews(): Promise<any[]> {
   try {
-    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/news` 
+    const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/news`
+    console.log(url,"==========================================================================")
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);

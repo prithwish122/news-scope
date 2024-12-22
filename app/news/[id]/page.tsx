@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -21,38 +24,43 @@ export async function parseMarkdownToHtml(markdown: string) {
 }
 
 async function getNewsArticle(id: string) {
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/news/${id}` 
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}/api/news/${id}`;
   const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) throw new Error("Failed to fetch news article");
   return (await res.json()).data;
 }
 
-export default async function NewsArticlePage({
+export default function NewsArticlePage({
   params,
 }: {
   params: { id: string };
 }) {
   const { id } = params;
-  let newsArticle;
+  const [newsArticle, setNewsArticle] = useState<any>(null);
+  const [parsedDescription, setParsedDescription] = useState<string>("");
 
-  try {
-    newsArticle = await getNewsArticle(id);
-  } catch (error) {
-    console.error(error);
-    notFound(); // Redirect to a 404 page if the article fetch fails
-  }
+  // Fetch the article data and parse description
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const article = await getNewsArticle(id);
+        setNewsArticle(article);
+        const parsedDesc = await parseMarkdownToHtml(article.description);
+        setParsedDescription(parsedDesc);
+      } catch (error) {
+        console.error(error);
+        notFound(); // Redirect to a 404 page if the article fetch fails
+      }
+    }
 
-  if (!newsArticle) {
-    notFound();
-  }
+    fetchData();
+  }, [id]);
+
+  // If the article is not loaded, return early
+  if (!newsArticle) return <div>Loading...</div>;
 
   // Calculate the read time using the article content
   const readTime = calculateReadTime(newsArticle.description);
-  console.log(newsArticle.description)
-  const parsedDescription = await parseMarkdownToHtml(newsArticle.description
-  );
-
- 
 
   return (
     <main className="container relative mx-auto max-w-4xl px-6 py-8">
@@ -93,7 +101,7 @@ export default async function NewsArticlePage({
             {/* Content */}
             <div
               className="prose prose-gray color-gray max-w-none"
-              dangerouslySetInnerHTML={{ __html: newsArticle.description }} // Render parsed markdown as HTML
+              dangerouslySetInnerHTML={{ __html: parsedDescription }} // Render parsed markdown as HTML
             ></div>
 
             {/* Video Embed */}

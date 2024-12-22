@@ -14,6 +14,10 @@ interface NewsBannerProps {
 }
 
 const truncateHtml = (htmlString: string, maxLength: number = 150): string => {
+  if (typeof window === "undefined") {
+    return htmlString; // Avoid truncation during SSR, return original string
+  }
+
   let doc = new DOMParser().parseFromString(htmlString, 'text/html');
   let bodyText = doc.body.textContent || "";
 
