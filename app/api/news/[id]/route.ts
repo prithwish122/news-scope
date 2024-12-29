@@ -11,12 +11,15 @@ export async function GET(
     // Initialize database connection
     await connectDB();
 
-    const Params = await params;
-    
+    // Await params before using its properties
+    const { id } = await params;
 
     // Fetch news item by ID
-    const newsItem = await News.findById(params.id);
-
+    
+    const newsItem = await News.findById(id);
+    console.log("=========================================================================")
+    console.log(newsItem);
+    console.log("=========================================================================")
     if (!newsItem) {
       return NextResponse.json(
         {
@@ -60,20 +63,23 @@ export async function PUT(
     const isAdmin = await checkAuthentication(request);
 
     if (!isAdmin) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: "Unauthorized: Only admins can edit news.",
-            },
-            { status: 403 }
-          );
-        }
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized: Only admins can edit news.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Await params before using its properties
+    const { id } = await params;
 
     // Parse the updated data from the request body
     const updatedData = await request.json();
 
     // Find and update the news item
-    const updatedNews = await News.findByIdAndUpdate(params.id, updatedData, {
+    const updatedNews = await News.findByIdAndUpdate(id, updatedData, {
       new: true, // Return the updated document
       runValidators: true, // Ensure schema validation
     });
@@ -121,17 +127,20 @@ export async function DELETE(
     const isAdmin = await checkAuthentication(request);
 
     if (!isAdmin) {
-          return NextResponse.json(
-            {
-              success: false,
-              message: "Unauthorized: Only admins can delete news.",
-            },
-            { status: 403 }
-          );
-        }
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Unauthorized: Only admins can delete news.",
+        },
+        { status: 403 }
+      );
+    }
+
+    // Await params before using its properties
+    const { id } = await params;
 
     // Delete news item by ID
-    const deletedNews = await News.findByIdAndDelete(params.id);
+    const deletedNews = await News.findByIdAndDelete(id);
 
     if (!deletedNews) {
       return NextResponse.json(

@@ -19,8 +19,13 @@ function calculateReadTime(content: string): string {
 }
 
 export async function parseMarkdownToHtml(markdown: string) {
-  const file = await remark().use(html).process(markdown);
-  return file.toString();
+  try {
+    const file = await remark().use(html).process(markdown);
+    return file.toString();
+  } catch (error) {
+    console.error("Error parsing markdown to HTML:", error);
+    throw error;
+  }
 }
 
 async function getNewsArticle(id: string) {
@@ -35,7 +40,6 @@ export default function NewsArticlePage({
 }: {
   params: { id: string };
 }) {
-  const { id } = params;
   const [newsArticle, setNewsArticle] = useState<any>(null);
   const [parsedDescription, setParsedDescription] = useState<string>("");
 
@@ -43,10 +47,13 @@ export default function NewsArticlePage({
   useEffect(() => {
     async function fetchData() {
       try {
+        const { id } = await params;
         const article = await getNewsArticle(id);
         setNewsArticle(article);
+        console.log("Article Description:", article.description);
         const parsedDesc = await parseMarkdownToHtml(article.description);
         setParsedDescription(parsedDesc);
+        console.log("Parsed Description:", parsedDesc);
       } catch (error) {
         console.error(error);
         notFound(); // Redirect to a 404 page if the article fetch fails
@@ -54,7 +61,7 @@ export default function NewsArticlePage({
     }
 
     fetchData();
-  }, [id]);
+  }, [params]);
 
   // If the article is not loaded, return early
   if (!newsArticle) return <div>Loading...</div>;
