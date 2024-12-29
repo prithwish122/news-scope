@@ -7,8 +7,7 @@ import { Card } from "@/components/ui/card";
 import { BackLink } from "@/components/BackLink";
 import { ArticleMeta } from "@/components/ArticleMeta";
 import { VideoEmbed } from "@/components/VideoEmbed";
-import { remark } from "remark";
-import html from "remark-html";
+import { marked } from 'marked';
 
 // Helper function to calculate read time
 function calculateReadTime(content: string): string {
@@ -18,10 +17,10 @@ function calculateReadTime(content: string): string {
   return `${readTime} min`;
 }
 
-export async function parseMarkdownToHtml(markdown: string) {
+export function parseMarkdownToHtml(markdown: string) {
   try {
-    const file = await remark().use(html).process(markdown);
-    return file.toString();
+    const html = marked(markdown);
+    return html;
   } catch (error) {
     console.error("Error parsing markdown to HTML:", error);
     throw error;
@@ -50,10 +49,9 @@ export default function NewsArticlePage({
         const { id } = await params;
         const article = await getNewsArticle(id);
         setNewsArticle(article);
-        console.log("Article Description:", article.description);
+
         const parsedDesc = await parseMarkdownToHtml(article.description);
         setParsedDescription(parsedDesc);
-        console.log("Parsed Description:", parsedDesc);
       } catch (error) {
         console.error(error);
         notFound(); // Redirect to a 404 page if the article fetch fails
